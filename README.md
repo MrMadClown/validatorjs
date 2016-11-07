@@ -20,10 +20,15 @@ Designed to work with Bootstrap.
 ```
 All available Validatiors:
 1. ```data-required="true"```
-2. ```data-length="true"``` 
-3. ```data-pattern="true"``` 
+
+2. ```data-length="true"```
+
+3. ```data-pattern="true"```
+
 4. ```data-callback="true"```
+
 5. ```data-or="true"```
+
 6. ```data-equals="true"```
 
 They get Validated in that order,
@@ -48,4 +53,5 @@ var defaults = {
 ```
 TODO:
 1. Explain Options
+
 2. Explain all Validators
