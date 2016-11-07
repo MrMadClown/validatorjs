@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Demos</title>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+	      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+	      integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+	<!-- validator.js styles -->
+	<link rel="stylesheet" href="css/validator.css">
+</head>
+<body class="container">
+<div class="jumbotron">
+	<h1>JQuery Form Validation</h1>
+	<p class="lead">
+		A plugin which validates Forms.
+		You can customize each error-message for each field / error combination.
+		Designed to work with Bootstrap
+	</p>
+	<div class="btn-group btn-group-justified" role="group">
+		<a href="#example1" class="btn btn-default">Required</a>
+		<a href="#example2" class="btn btn-default">Pattern</a>
+		<a href="#example3" class="btn btn-default">Or</a>
+		<a href="#example4" class="btn btn-default">Equals</a>
+		<a href="#example5" class="btn btn-default">Custom</a>
+	</div>
+</div>
+<div class="panel panel-default" id="example1">
+	<div class="panel-heading">Required Fields</div>
+	<div class="panel-body">
+		<div class="row">
+			<div class="col-md-6">
+					 <pre>
+					    <code>
+&lt;script&gt;$( "[data-validator=true]" ).validator( {} );&lt;/script&gt;
+&lt;form data-validator="true"&gt;
+    &lt;div class="form-group"&gt;
+        &lt;input data-required="true"
+            type="text" class="form-control"&gt;
+        &lt;span class="help-block error--required"&gt;
+            Please fill out this field
+        &lt;/span&gt;
+    &lt;/div&gt;
+&lt;/form&gt;</code>
+					 </pre>
+			</div>
+			<div class="col-md-6">
+				<form data-validator="true">
+					<div class="form-group">
+						<label for="exampleInputEmail1">Email address</label>
+						<input data-required="true" type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+						<span class="help-block error--required">Please fill out this field</span>
+					</div>
+					<div class="form-group">
+						<label for="exampleInputPassword1">Password</label>
+						<input data-required="true" type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+						<span class="help-block error--required">Please fill out this field</span>
+					</div>
+					<button type="submit">Submit</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default" id="example2">
+	<div class="panel-heading">Validation Pattern</div>
+	<div class="panel-body">
+		<div class="row">
+			<div class="col-md-6">
+				<pre>
+					<code>
+&lt;script&gt;$( "[data-validator=true]" ).validator( {} );&lt;/script&gt;
+&lt;form data-validator="true"&gt;
+    &lt;div class="form-group"&gt;
+        &lt;input
+            data-pattern="^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$"
+            type="text" class="form-control"&gt;
+        &lt;span class="help-block error--required"&gt;
+            Please enter a valid address
+        &lt;/span&gt;
+    &lt;/div&gt;
+&lt;/form&gt;</code>
+				</pre>
+			</div>
+			<div class="col-md-6">
+				<form data-validator="true">
+					<div class="form-group">
+						<label for="exampleInputEmail3">Email address</label>
+						<input data-pattern="^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$" type="email" class="form-control" id="exampleInputEmail3" placeholder="Email">
+						<span class="help-block error--pattern">Please enter a valid address</span>
+					</div>
+					<div class="form-group">
+						<label for="exampleInputPassword3">Password</label>
+						<input data-required="true" type="password" class="form-control" id="exampleInputPassword3" placeholder="Password">
+						<span class="help-block error--required">Please fill out this field</span>
+					</div>
+					<button type="submit">Submit</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">Required Fields and Field With Validation Pattern</div>
+	<div class="panel-body">
+		<div class="row">
+			<div class="col-md-6">
+				<form data-validator="true">
+					<div class="form-group">
+						<label for="exampleInputEmail2">Email address</label>
+						<input data-required="true" data-pattern="^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$" type="email" class="form-control" id="exampleInputEmail2" placeholder="Email">
+						<span class="help-block error--required">Please fill out this field</span>
+						<span class="help-block error--pattern">Please enter a valid address</span>
+					</div>
+					<div class="form-group">
+						<label for="exampleInputPassword2">Password</label>
+						<input data-required="true" type="password" class="form-control" id="exampleInputPassword2" placeholder="Password">
+						<span class="help-block error--required">Please fill out this field</span>
+					</div>
+					<button type="submit">Submit</button>
+				</form>
+			</div>
+			<div class="col-md-6">
+				<pre>
+			        <code>
+&lt;form data-validator="true"&gt;
+    &lt;div class="form-group"&gt;
+        &lt;input data-required="true"
+            data-pattern="^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$"
+            type="text" class="form-control"&gt;
+        &lt;span class="help-block error--required"&gt;
+            Please fill out this field
+        &lt;/span&gt;
+        &lt;span class="help-block error--required"&gt;
+            Please enter a valid address
+        &lt;/span&gt;
+    &lt;/div&gt;
+&lt;/form&gt;</code>
+					 </pre>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default" id="example3">
+	<div class="panel-heading">One of Two fields is Required</div>
+	<div class="panel-body">
+		<div class="row">
+			<div class="col-md-6">
+				<form data-validator="true">
+					<div class="form-group">
+						<label for="exampleInputUserName">Username</label>
+						<input data-or="email" name="username" type="text" class="form-control" id="exampleInputUserName" placeholder="Username">
+						<span class="help-block error--or">Please fill out this field Or some Other one</span>
+					</div>
+					<div class="form-group">
+						<label for="exampleInputEmail4">Email address</label>
+						<input data-or="username" data-pattern="^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$" name="email" type="email" class="form-control" id="exampleInputEmail4" placeholder="Email">
+						<span class="help-block error--or">Please fill out this field Or some Other one</span>
+						<span class="help-block error--pattern">Please enter a valid address</span>
+					</div>
+					<div class="form-group">
+						<label for="exampleInputPassword4">Password</label>
+						<input data-required="true" type="password" class="form-control" id="exampleInputPassword4" placeholder="Password">
+						<span class="help-block error--required">Please fill out this field</span>
+					</div>
+					<button type="submit">Submit</button>
+				</form>
+			</div>
+			<div class="col-md-6">
+				<pre>
+			        <code>
+&lt;form data-validator="true"&gt;
+    &lt;div class="form-group"&gt;
+        &lt;input data-required="true"
+            name="email"
+            data-or="username"
+            type="text" class="form-control"&gt;
+        &lt;input data-required="true"
+            name="username"
+            data-or="email"
+            type="text" class="form-control"&gt;
+        &lt;span class="help-block error--or"&gt;
+            Fill out one of the two Fields
+        &lt;/span&gt;
+    &lt;/div&gt;
+&lt;/form&gt;</code>
+					 </pre>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default" id="example4">
+	<div class="panel-heading">Required Fields Two Fields have to have the same Value</div>
+	<div class="panel-body">
+		<div class="row">
+			<div class="col-md-6">
+				<pre>
+					<code>
+&lt;form data-validator="true"&gt;
+    &lt;div class="form-group"&gt;
+        &lt;input data-required="true"
+            name="email"
+            <b>data-or="username"</b>
+            type="text" class="form-control"&gt;
+        &lt;input data-required="true"
+            name="username"
+            <b>data-or="email"</b>
+            type="text" class="form-control"&gt;
+        &lt;span class="help-block error--or"&gt;
+            Fill out one of the two Fields
+        &lt;/span&gt;
+    &lt;/div&gt;
+&lt;/form&gt;</code>
+				</pre>
+			</div>
+			<div class="col-md-6">
+				<form data-validator="true">
+					<div class="form-group">
+						<label for="exampleInputUserName2">Username</label>
+						<input data-required="true" name="username" type="text" class="form-control" id="exampleInputUserName2" placeholder="Username">
+						<span class="help-block error--required">Please fill out this field</span>
+					</div>
+					<div class="form-group">
+						<label for="exampleInputEmail5">Email address</label>
+						<input data-required="true" data-pattern="^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$" name="email" type="email" class="form-control" id="exampleInputEmail5" placeholder="Email">
+						<span class="help-block error--required">Please fill out this field</span>
+						<span class="help-block error--pattern">Please enter a valid address</span>
+					</div>
+					<div class="form-group">
+						<label for="exampleInputPassword5">Password</label>
+						<input data-required="true" data-equals="repeat" name="password" type="password" class="form-control" id="exampleInputPassword5" placeholder="Password">
+						<span class="help-block error--equals">Field Value has to be the same as the one below</span>
+						<span class="help-block error--required">Please fill out this field</span>
+					</div>
+					<div class="form-group">
+						<label for="exampleInputPassword6">Repeat Password</label>
+						<input data-required="true" data-equals="password" name="repeat" type="password" class="form-control" id="exampleInputPassword6" placeholder="Repeat Password">
+						<span class="help-block error--equals">Field Value has to be the same as the one above</span>
+						<span class="help-block error--required">Please fill out this field</span>
+					</div>
+					<button type="submit">Submit</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default" id="example5">
+	<div class="panel-heading">Custom Validation Callback</div>
+	<div class="panel-body">
+		<div class="row">
+			<div class="col-md-6">
+				<pre>
+					<code>
+&lt;form data-validator="true"&gt;
+    &lt;div class="form-group"&gt;
+        &lt;input data-required="true"
+            <b>data-callback="customValidation"</b>
+            type="text" class="form-control"&gt;
+        &lt;span class="help-block error--callback"&gt;
+            Your Input is for some Reason Invalid
+        &lt;/span&gt;
+    &lt;/div&gt;
+&lt;/form&gt;
+&lt;script&gt;
+    /**
+     * @param {jQuery} $input
+     * @returns {boolean}
+     */
+    window.customValidation = function( $input ){
+        var isValid = false;
+        //Do some Voodoo to figure out if the input is Valid
+        return isValid;
+    }
+&lt;/script&gt;</code>
+				</pre>
+			</div>
+			<div class="col-md-6">
+				<script>
+					/**
+					 * @param {jQuery} $input
+					 * @returns {boolean}
+					 */
+					window.customValidation = function( $input ){
+						var isValid = false;
+						//Do some Voodoo to figure out if the input is Valid
+						return isValid;
+					}
+				</script>
+				<form data-validator="true">
+					<div class="form-group">
+						<label for="exampleInputUserName3">Username</label>
+						<input data-required="true" data-callback="customValidation" name="username" type="text" class="form-control" id="exampleInputUserName3" placeholder="Username">
+						<span class="help-block error--callback">Your Input is for some Reason Invalid</span>
+						<span class="help-block error--required">Please fill out this field</span>
+					</div>
+					<button type="submit">Submit</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+<script type="application/javascript" src="../validator.js"></script>
+<script>$( "[data-validator=true]" ).validator( {} );</script>
+</body>
+</html>
