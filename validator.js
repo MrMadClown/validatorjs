@@ -56,7 +56,15 @@
 			if (plugin.settings.debug) {
 				_validateSetup();
 			}
+
 			_bindEvents();
+		};
+
+		plugin.destroy = function () {
+			$el.off("submit");
+			if (!plugin.settings.onlyValidateOnSubmit) {
+				$inputs.off("blur");
+			}
 		};
 
 		var _validateSetup = function () {
@@ -73,11 +81,11 @@
 		};
 
 		var _bindEvents = function () {
-			$el.submit(function (event) {
+			$el.on("submit", function (event) {
 				_validateForm(event);
 			});
 			if (!plugin.settings.onlyValidateOnSubmit) {
-				$inputs.blur(function () {
+				$inputs.on("blur", function () {
 					_validateInput($(this));
 				});
 			}
@@ -105,83 +113,87 @@
 
 		var _handleRequired = function ($input) {
 			if ($input.data("required")) {
-				if (!_isEmpty($input)) {
-					_removeError($input, "required");
-				}
-				else {
-					_hasError = true;
-					_setError($input, "required");
-				}
+				_handle($input, _isNotEmpty, "required");
 			}
 		};
 
 		var _handleLength = function ($input) {
-			if ($input.data("length") && !_isEmpty($input)) {
-				if ($input.val().length >= parseInt($input.data("length"))) {
-					_removeError($input, "length");
-				}
-				else {
-					_hasError = true;
-					_setError($input, "length");
-				}
+			if ($input.data("length") && _isNotEmpty($input)) {
+				_handle($input, _validateLength, "length");
 			}
+		};
+
+		var _validateLength = function ($input) {
+			return $input.val().length >= parseInt($input.data("length"))
 		};
 
 		var _handlePattern = function ($input) {
-			if ($input.data("pattern") && !_isEmpty($input)) {
-				if ((new RegExp($input.data("pattern"))).test($input.val())) {
-					_removeError($input, "pattern");
-				}
-				else {
-					_hasError = true;
-					_setError($input, "pattern");
-				}
+			if ($input.data("pattern") && _isNotEmpty($input)) {
+				_handle($input, _validatePattern, "pattern");
 			}
 		};
 
+		var _validatePattern = function ($input) {
+			return (new RegExp($input.data("pattern"))).test($input.val());
+		};
+
 		var _handleCallBack = function ($input) {
-			if ($input.data("callback") && !_isEmpty($input)) {
+			if ($input.data("callback") && _isNotEmpty($input)) {
 				var functionName = $input.data("callback");
-				if (typeof window[functionName] === "function") {
-					if (window[functionName]($input)) {
-						_removeError($input, "callback");
-					}
-					else {
-						_hasError = true;
-						_setError($input, "callback");
-					}
-				}
+				_handle($input, window[functionName], "callback");
 			}
 		};
 
 		var _handleOr = function ($input) {
 			if ($input.data("or")) {
 				var or = $input.data("or");
-				if (!_isEmpty($el.find('[name=' + or + ']')) || !_isEmpty($input)) {
-					_removeError($input, "or");
-				}
-				else {
-					_hasError = true;
-					_setError($input, "or");
-				}
+				var $orInput = $el.find("[name=" + or + "]");
+				_handleDouble($input, $orInput, _validateOr, "or");
 			}
+		};
+
+		var _validateOr = function ($input, $secondInput) {
+			return _isNotEmpty($input) || _isNotEmpty($secondInput);
 		};
 
 		var _handleEquals = function ($input) {
 			if ($input.data("equals")) {
 				var equals = $input.data("equals");
-				if ($el.find('[name=' + equals + ']').val() === $input.val()) {
-					_removeError($input, "equals");
-				}
-				else {
+				var $equalsInput = $el.find("[name=" + equals + "]");
+				_handleDouble($input, $equalsInput, _validateEquals, "equals");
+			}
+		};
+
+		var _validateEquals = function ($input, $secondInput) {
+			return $input.val() === $secondInput.val();
+		};
+
+		var _handle = function ($input, condition, errorType) {
+			if (typeof condition === "function") {
+				if (condition($input)) {
+					_removeError($input, errorType);
+				} else {
 					_hasError = true;
-					_setError($input, "equals");
+					_setError($input, errorType);
 				}
 			}
 		};
 
-		var _isEmpty = function ($input) {
-			return $input.val() === "";
+		var _handleDouble = function ($input, $secondInput, condition, errorType) {
+			if (typeof condition === "function") {
+				if (condition($input, $secondInput)) {
+					_removeError($input, errorType);
+					_removeError($secondInput, errorType);
+				} else {
+					_hasError = true;
+					_setError($input, errorType);
+					_setError($secondInput, errorType);
+				}
+			}
+		};
+
+		var _isNotEmpty = function ($input) {
+			return $input.val() !== "";
 		};
 
 		var _setError = function ($input, errorType) {
@@ -189,8 +201,9 @@
 			if (!$parent.hasClass(plugin.settings.errorClass)) {
 				$parent.addClass(plugin.settings.errorClass);
 			}
-			if (!$parent.hasClass(plugin.settings.errorClass + "--" + errorType)) {
-				$parent.addClass(plugin.settings.errorClass + "--" + errorType);
+			var errorClass = plugin.settings.errorClass + "--" + errorType;
+			if (!$parent.hasClass(errorClass)) {
+				$parent.addClass(errorClass);
 			}
 			var errors = _getErrorsFromInput($input);
 			if (!errors.includes(errorType)) {
@@ -202,8 +215,8 @@
 		var _removeError = function ($input, errorType) {
 			var errors = _getErrorsFromInput($input);
 			if (errors.includes(errorType)) {
-				errors = errors.filter(function (i) {
-					return i != errorType
+				errors = errors.filter(function (error) {
+					return error != errorType
 				});
 				$input.data("errors", errors);
 			}
@@ -215,7 +228,7 @@
 
 		var _getErrorsFromInput = function ($input) {
 			var errors = $input.data("errors");
-			if (errors == undefined) {
+			if (errors === undefined) {
 				errors = [];
 			}
 			return errors;
@@ -230,9 +243,9 @@
 
 	$.fn.validator = function (options) {
 		return this.each(function () {
-			if (undefined == $(this).data('plugin--validator')) {
+			if (undefined === $(this).data('plugin--validator.js')) {
 				var plugin = new $.validator(this, options);
-				$(this).data('plugin--validator', plugin);
+				$(this).data('plugin--validator.js', plugin);
 			}
 		});
 	};
