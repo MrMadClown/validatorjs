@@ -63,17 +63,17 @@ It also checks if the function in a ```data-callback="someFunctionName"``` is de
 ##Validators Explained
 All available Validators:
 
-1. ```data-required="true"``` 
+1. data-required="true"
 
-2. ```data-length="12"``` 
+2. data-length="12"
 
-3. ```data-pattern="^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$"```
+3. data-pattern="^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$"
 
-4. ```data-callback="someFunctionName"``` 
+4. data-callback="someFunctionName" 
 
-5. ```data-or="nameOfSomeOtherInput"``` 
+5. data-or="nameOfSomeOtherInput"
 
-6. ```data-equals="nameOfSomeOtherInput"``` 
+6. data-equals="nameOfSomeOtherInput" 
 
 They get Validated in that order.
 
