@@ -75,6 +75,12 @@
 						if ( _getParentFromInput( $input ).find( "[class*=" + validator + "]" ).length == 0 ) {
 							console.warn( $input, "Does not have a Error Message for the " + validator + " Validator!" );
 						}
+						if(
+							validator == "callback"
+							&& typeof window[ $input.data( "callback" )] != "function"
+						) {
+							console.warn( "The function " + validator +" used as callback on " + $input + " is not defined!" );
+						}
 					}
 				} );
 			} );
@@ -245,9 +251,9 @@
 
 	$.fn.validator = function ( options ) {
 		return this.each( function () {
-			if ( undefined === $( this ).data( 'plugin--validator.js' ) ) {
+			if ( undefined === $( this ).data( "plugin--validator.js" ) ) {
 				var plugin = new $.validator( this, options );
-				$( this ).data( 'plugin--validator.js', plugin );
+				$( this ).data( "plugin--validator.js", plugin );
 			}
 		} );
 	};
