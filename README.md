@@ -62,11 +62,17 @@ It also checks if the function in a ```data-callback="someFunctionName"``` is de
 
 ##Validators Explained
 All available Validators:
+
 1. ```data-required="true"``` 
-2. ```data-length="12"```
+
+2. ```data-length="12"``` 
+
 3. ```data-pattern="^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$"```
+
 4. ```data-callback="someFunctionName"``` 
+
 5. ```data-or="nameOfSomeOtherInput"``` 
+
 6. ```data-equals="nameOfSomeOtherInput"``` 
 
 They get Validated in that order.
@@ -75,25 +81,30 @@ They get Validated in that order.
 ```data-required="true"``` 
 If this attribute is present,
 the Plugin will check that the value isn't empty.
+
 ###length
 ```data-length="12"```
 If this attribute is present,
 the Plugin will check that the value is equally long or longer than specified in the attribute.
+
 ###pattern
 ```data-pattern="^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$"```
 If this attribute is present,
 the plugin will check if the value matches the given Pattern.
+
 ###callback
 ```data-callback="someFunctionName"``` 
 If this attribute is present,
 the Plugin will check if there is a function ```someFunctionName``` defined.
 If the function is defined, it will call it and based on the return (should be a Boolean)
 it marks the Input as Valid / Invalid.
+
 ###or
 ```data-or="nameOfSomeOtherInput"``` 
 If this attribute is present,
 the Plugin checks if this or the Input specified in the attribute is empty.
 If neither of the Inputs is filled, both Inputs will be marked Invalid.
+
 ###equals
 ```data-equals="nameOfSomeOtherInput"``` 
 If this attribute is present,
