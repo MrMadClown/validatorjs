@@ -285,9 +285,15 @@
 					 * @param {jQuery} $input
 					 * @returns {boolean}
 					 */
-					window.customValidation = function( $input ){
+					window.customValidation = function( $input ) {
 						var isValid = false;
-						//Do some Voodoo to figure out if the input is Valid
+						var valueToCheck = $input.val();
+
+						if( valueToCheck == "a"
+                            && valueToCheck == "b" ) {
+                            //Do some Voodoo to determine if input is Valid
+                            isValid = true;
+						}
 						return isValid;
 					}
 				</script>
