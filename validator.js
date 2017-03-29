@@ -20,14 +20,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-(function ( $ ) {
+(function (window) {
 	"use strict";
 
 	/**
 	 * https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/includes
 	 */
 	if (!Array.prototype.includes) {
-		Array.prototype.includes = function(searchElement /*, fromIndex*/) {
+		Array.prototype.includes = function (searchElement /*, fromIndex*/) {
 			if (this == null) {
 				throw new TypeError("Array.prototype.includes called on null or undefined");
 			}
@@ -43,7 +43,9 @@
 				k = n;
 			} else {
 				k = len + n;
-				if (k < 0) {k = 0;}
+				if (k < 0) {
+					k = 0;
+				}
 			}
 			var currentElement;
 			while (k < len) {
@@ -58,7 +60,102 @@
 		};
 	}
 
-	$.validator = function ( element, options ) {
+	/**
+	 * https://developer.mozilla.org/en-US/docs/Web/API/Element/matches
+	 */
+	if (!Element.prototype.matches) {
+		Element.prototype.matches =
+			Element.prototype.matchesSelector ||
+			Element.prototype.mozMatchesSelector ||
+			Element.prototype.msMatchesSelector ||
+			Element.prototype.oMatchesSelector ||
+			Element.prototype.webkitMatchesSelector ||
+			function (s) {
+				var matches = (this.document || this.ownerDocument).querySelectorAll(s),
+					i = matches.length;
+				while (--i >= 0 && matches.item(i) !== this) {
+				}
+				return i > -1;
+			};
+	}
+
+	/**
+	 * https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
+	 */
+	if (!Array.prototype.filter) {
+		Array.prototype.filter = function (fun/*, thisArg*/) {
+			'use strict';
+
+			if (this === void 0 || this === null) {
+				throw new TypeError();
+			}
+
+			var t = Object(this);
+			var len = t.length >>> 0;
+			if (typeof fun !== 'function') {
+				throw new TypeError();
+			}
+
+			var res = [];
+			var thisArg = arguments.length >= 2 ? arguments[1] : void 0;
+			for (var i = 0; i < len; i++) {
+				if (i in t) {
+					var val = t[i];
+
+					// NOTE: Technically this should Object.defineProperty at
+					//       the next index, as push can be affected by
+					//       properties on Object.prototype and Array.prototype.
+					//       But that method's new, and collisions should be
+					//       rare, so use the more-compatible alternative.
+					if (fun.call(thisArg, val, i, t)) {
+						res.push(val);
+					}
+				}
+			}
+
+			return res;
+		};
+	}
+
+	function _parents(el, selector) {
+		while (el && el.parentNode) {
+			el = el.parentNode;
+			if (el.matches(selector)) {
+				return el;
+			}
+		}
+
+		// Many DOM methods return null if they don't
+		// find the element they are searching for
+		// It would be OK to omit the following and just
+		// return undefined
+		return null;
+	}
+
+	function MergeRecursive(obj1, obj2) {
+		var obj3 = obj1;
+		for (var p in obj2) {
+			if (obj2.hasOwnProperty(p)) {
+				try {
+					// Property in destination object set; update its value.
+					if (obj2[p].constructor == Object) {
+						obj3[p] = MergeRecursive(obj3[p], obj2[p]);
+
+					} else {
+						obj3[p] = obj2[p];
+					}
+
+				} catch (e) {
+					// Property in destination object not set; create it and set its value.
+					obj3[p] = obj2[p];
+				}
+			}
+		}
+
+		return obj3;
+	}
+
+	function _validator(element, options) {
 
 		var defaults = {
 			elementsToValidate: [
@@ -82,15 +179,14 @@
 		];
 		var _hasError = false;
 		var plugin = this;
-		var $el = $( element );
-		var $inputs;
+		var inputs;
 
 		plugin.settings = {};
 
 		plugin.init = function () {
-			plugin.settings = $.extend( {}, defaults, options );
-			$inputs = $el.find( plugin.settings.elementsToValidate.join( "," ) );
-			if ( plugin.settings.debug ) {
+			plugin.settings = MergeRecursive(defaults, options);
+			inputs = element.querySelectorAll(plugin.settings.elementsToValidate.join(","));
+			if (plugin.settings.debug) {
 				_validateSetup();
 			}
 
@@ -98,200 +194,202 @@
 		};
 
 		plugin.destroy = function () {
-			$el.off( "submit" );
-			if ( !plugin.settings.onlyValidateOnSubmit ) {
-				$inputs.off( "blur" );
+			element.removeEventListener("submit");
+			if (!plugin.settings.onlyValidateOnSubmit) {
+				Array.prototype.slice.call(inputs).forEach(function (input) {
+					input.removeEventListener("blur")
+				});
 			}
 		};
 
 		var _validateSetup = function () {
-			$inputs.each( function () {
-				var $input = $( this );
-				$.each( Object.keys( $input.data() ), function ( index, validator ) {
-					if ( _validators.includes( validator ) ) {
-						if ( _getParentFromInput( $input ).find( "[class*=" + validator + "]" ).length == 0 ) {
-							console.warn( $input, "Does not have a Error Message for the " + validator + " Validator!" );
+			Array.prototype.slice.call(inputs).forEach(function (input) {
+				Object.keys(input.dataset).forEach(function (index, validator) {
+					if (_validators.includes(validator)) {
+						if (_getParentFromInput(input).querySelectorAll("[class*=" + validator + "]").length == 0) {
+							console.warn(input, "Does not have a Error Message for the " + validator + " Validator!");
 						}
-						if(
+						if (
 							validator == "callback"
-							&& typeof window[ $input.data( "callback" )] != "function"
+							&& typeof window[input.dataset["callback"]] != "function"
 						) {
-							console.warn( "The function " + validator +" used as callback on " + $input + " is not defined!" );
+							console.warn("The function " + validator + " used as callback on " + input + " is not defined!");
 						}
 					}
-				} );
-			} );
+				});
+			});
 		};
 
 		var _bindEvents = function () {
-			$el.on( "submit", function ( event ) {
-				_validateForm( event );
-			} );
-			if ( !plugin.settings.onlyValidateOnSubmit ) {
-				$inputs.on( "blur", function () {
-					_validateInput( $( this ) );
-				} );
+			element.addEventListener("submit", function (event) {
+				_validateForm(event);
+			});
+			if (!plugin.settings.onlyValidateOnSubmit) {
+				Array.prototype.slice.call(inputs).forEach(function (input) {
+					input.addEventListener("blur", function () {
+						_validateInput(this);
+					})
+				});
 			}
 		};
 
-		var _validateForm = function ( event ) {
+		var _validateForm = function (event) {
 			_hasError = false;
-			$inputs.each( function () {
-				_validateInput( $( this ) );
-			} );
+			Array.prototype.slice.call(inputs).forEach(function () {
+				_validateInput(this);
+			});
 
-			if ( _hasError ) {
+			if (_hasError) {
 				event.preventDefault();
 			}
 		};
 
-		var _validateInput = function ( $input ) {
-			_handleRequired( $input );
-			_handleLength( $input );
-			_handlePattern( $input );
-			_handleCallBack( $input );
-			_handleOr( $input );
-			_handleEquals( $input );
+		var _validateInput = function (input) {
+			_handleRequired(input);
+			_handleLength(input);
+			_handlePattern(input);
+			_handleCallBack(input);
+			_handleOr(input);
+			_handleEquals(input);
 		};
 
-		var _handleRequired = function ( $input ) {
-			if ( $input.data( "required" ) ) {
-				_handle( $input, _isNotEmpty, "required" );
+		var _handleRequired = function (input) {
+			if (input.dataset["required"]) {
+				_handle(input, _isNotEmpty, "required");
 			}
 		};
 
-		var _handleLength = function ( $input ) {
-			if ( $input.data( "length" ) && _isNotEmpty( $input ) ) {
-				_handle( $input, _validateLength, "length" );
+		var _handleLength = function (input) {
+			if (input.dataset["length"] && _isNotEmpty(input)) {
+				_handle(input, _validateLength, "length");
 			}
 		};
 
-		var _validateLength = function ( $input ) {
-			return $input.val().length >= parseInt( $input.data( "length" ) )
+		var _validateLength = function (input) {
+			return input.value.length >= parseInt(input.dataset["length"])
 		};
 
-		var _handlePattern = function ( $input ) {
-			if ( $input.data( "pattern" ) && _isNotEmpty( $input ) ) {
-				_handle( $input, _validatePattern, "pattern" );
+		var _handlePattern = function (input) {
+			if (input.dataset["pattern"] && _isNotEmpty(input)) {
+				_handle(input, _validatePattern, "pattern");
 			}
 		};
 
-		var _validatePattern = function ( $input ) {
-			return (new RegExp( $input.data( "pattern" ) )).test( $input.val() );
+		var _validatePattern = function (input) {
+			return (new RegExp(input.dataset["pattern"])).test(input.value);
 		};
 
-		var _handleCallBack = function ( $input ) {
-			if ( $input.data( "callback" ) && _isNotEmpty( $input ) ) {
-				var functionName = $input.data( "callback" );
-				_handle( $input, window[functionName], "callback" );
+		var _handleCallBack = function (input) {
+			if (input.dataset["callback"] && _isNotEmpty(input)) {
+				var functionName = input.dataset["callback"];
+				_handle(input, window[functionName], "callback");
 			}
 		};
 
-		var _handleOr = function ( $input ) {
-			if ( $input.data( "or" ) ) {
-				var or = $input.data( "or" );
-				var $orInput = $el.find( "[name=" + or + "]" );
-				_handleDouble( $input, $orInput, _validateOr, "or" );
+		var _handleOr = function (input) {
+			if (input.dataset["or"]) {
+				var or = input.dataset["or"];
+				var orInput = element.querySelector("[name=" + or + "]");
+				_handleDouble(input, orInput, _validateOr, "or");
 			}
 		};
 
-		var _validateOr = function ( $input, $secondInput ) {
-			return _isNotEmpty( $input ) || _isNotEmpty( $secondInput );
+		var _validateOr = function (input, secondInput) {
+			return _isNotEmpty(input) || _isNotEmpty(secondInput);
 		};
 
-		var _handleEquals = function ( $input ) {
-			if ( $input.data( "equals" ) ) {
-				var equals = $input.data( "equals" );
-				var $equalsInput = $el.find( "[name=" + equals + "]" );
-				_handleDouble( $input, $equalsInput, _validateEquals, "equals" );
+		var _handleEquals = function (input) {
+			if (input.dataset["equals"]) {
+				var equals = input.dataset["equals"];
+				var equalsInput = element.querySelector("[name=" + equals + "]");
+				_handleDouble(input, equalsInput, _validateEquals, "equals");
 			}
 		};
 
-		var _validateEquals = function ( $input, $secondInput ) {
-			return $input.val() === $secondInput.val();
+		var _validateEquals = function (input, secondInput) {
+			return input.value === secondInput.value;
 		};
 
-		var _handle = function ( $input, condition, errorType ) {
-			if ( typeof condition === "function" ) {
-				if ( condition( $input ) ) {
-					_removeError( $input, errorType );
+		var _handle = function (input, condition, errorType) {
+			if (typeof condition === "function") {
+				if (condition(input)) {
+					_removeError(input, errorType);
 				}
 				else {
 					_hasError = true;
-					_setError( $input, errorType );
+					_setError(input, errorType);
 				}
 			}
 		};
 
-		var _handleDouble = function ( $input, $secondInput, condition, errorType ) {
-			if ( typeof condition === "function" ) {
-				if ( condition( $input, $secondInput ) ) {
-					_removeError( $input, errorType );
-					_removeError( $secondInput, errorType );
+		var _handleDouble = function (input, secondInput, condition, errorType) {
+			if (typeof condition === "function") {
+				if (condition(input, secondInput)) {
+					_removeError(input, errorType);
+					_removeError(secondInput, errorType);
 				}
 				else {
 					_hasError = true;
-					_setError( $input, errorType );
-					_setError( $secondInput, errorType );
+					_setError(input, errorType);
+					_setError(secondInput, errorType);
 				}
 			}
 		};
 
-		var _isNotEmpty = function ( $input ) {
-			return $input.val() !== "";
+		var _isNotEmpty = function (input) {
+			return input.value !== "";
 		};
 
-		var _setError = function ( $input, errorType ) {
-			var $parent = _getParentFromInput( $input );
-			if ( !$parent.hasClass( plugin.settings.errorClass ) ) {
-				$parent.addClass( plugin.settings.errorClass );
+		var _setError = function (input, errorType) {
+			var parent = _getParentFromInput(input);
+			if (!parent.classList.contains(plugin.settings.errorClass)) {
+				parent.classList.add(plugin.settings.errorClass);
 			}
 			var errorClass = plugin.settings.errorClass + "--" + errorType;
-			if ( !$parent.hasClass( errorClass ) ) {
-				$parent.addClass( errorClass );
+			if (!parent.classList.contains(errorClass)) {
+				parent.classList.add(errorClass);
 			}
-			var errors = _getErrorsFromInput( $input );
-			if ( !errors.includes( errorType ) ) {
-				errors.push( errorType );
-				$input.data( "errors", errors );
+			var errors = _getErrorsFromInput(input);
+			if (!errors.includes(errorType)) {
+				errors.push(errorType);
+				input.dataset["errors"] = errors;
 			}
 		};
 
-		var _removeError = function ( $input, errorType ) {
-			var errors = _getErrorsFromInput( $input );
-			if ( errors.includes( errorType ) ) {
-				errors = errors.filter( function ( error ) {
+		var _removeError = function (input, errorType) {
+			var errors = _getErrorsFromInput(input);
+			if (errors.includes(errorType)) {
+				errors = errors.filter(function (error) {
 					return error != errorType
-				} );
-				$input.data( "errors", errors );
+				});
+				input.dataset["errors"] = errors;
 			}
-			_getParentFromInput( $input ).removeClass( plugin.settings.errorClass + "--" + errorType );
-			if ( errors.length == 0 ) {
-				_getParentFromInput( $input ).removeClass( plugin.settings.errorClass );
+			_getParentFromInput(input).classList.remove(plugin.settings.errorClass + "--" + errorType);
+			if (errors.length == 0) {
+				_getParentFromInput(input).classList.remove(plugin.settings.errorClass);
 			}
 		};
 
-		var _getErrorsFromInput = function ( $input ) {
-			var errors = $input.data( "errors" );
-			if ( errors === undefined ) {
-				errors = [];
+		var _getErrorsFromInput = function (input) {
+			if (input.dataset.hasOwnProperty("errors")) {
+				return input.dataset.errors.split(",");
+			} else {
+				return [];
 			}
-			return errors;
 		};
 
-		var _getParentFromInput = function ( $input ) {
-			return $input.parents( plugin.settings.formRowSelector );
+		var _getParentFromInput = function (input) {
+			return _parents(input, plugin.settings.formRowSelector);
 		};
 
 		plugin.init();
-	};
+	}
 
-	$.fn.validator = function ( options ) {
-		return this.each( function () {
-			if ( undefined === $( this ).data( "plugin--validator.js" ) ) {
-				var plugin = new $.validator( this, options );
-				$( this ).data( "plugin--validator.js", plugin );
+	window.validator = function (elementSelector, options) {
+		Array.prototype.slice.call(document.querySelectorAll(elementSelector)).forEach(function (element) {
+			if (undefined === element.dataset["validatorPlugin"]) {
+				element.dataset["validatorPlugin"] = new _validator(element, options);
 			}
-		} );
-	};
-})( jQuery );
+		});
+	}
+})(window);
